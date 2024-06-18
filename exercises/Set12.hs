@@ -74,7 +74,7 @@ instance Functor List where
   fmap _ Empty = Empty
 
 ------------------------------------------------------------------------------
--- Ex 5: Here's another list type. This type every node contains two
+-- Ex 5: Here's another list type. This time every node contains two
 -- values, so it's a type for a list of pairs. Implement the instance
 -- Functor TwoList.
 --
