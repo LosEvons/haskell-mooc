@@ -13,7 +13,11 @@ data Country = Finland | Switzerland | Norway
   deriving Show
 
 instance Eq Country where
-  (==) = todo
+  (==) :: Country -> Country -> Bool
+  Finland == Finland = True
+  Switzerland == Switzerland = True
+  Norway == Norway = True
+  _ == _ = False
 
 ------------------------------------------------------------------------------
 -- Ex 2: implement an Ord instance for Country so that
@@ -22,10 +26,17 @@ instance Eq Country where
 -- Remember minimal complete definitions!
 
 instance Ord Country where
-  compare = todo -- implement me?
-  (<=) = todo -- and me?
-  min = todo -- and me?
-  max = todo -- and me?
+  (<=)  :: Country -> Country -> Bool
+  Finland <= Finland = True
+  Finland <= _ = True
+  Norway <= Norway = True
+  Norway <= Switzerland = True
+  Switzerland <= Switzerland = True
+  _ <= _ = False
+  min x y | x <= y = x
+          | otherwise = y
+  max x y | x <= y = y
+          | otherwise = x
 
 ------------------------------------------------------------------------------
 -- Ex 3: Implement an Eq instance for the type Name which contains a String.
@@ -41,7 +52,7 @@ data Name = Name String
   deriving Show
 
 instance Eq Name where
-  (==) = todo
+  (==) (Name s1) (Name s2) = map toLower s1 == map toLower s2  
 
 ------------------------------------------------------------------------------
 -- Ex 4: here is a list type parameterized over the type it contains.
@@ -55,7 +66,10 @@ data List a = Empty | LNode a (List a)
   deriving Show
 
 instance Eq a => Eq (List a) where
-  (==) = todo
+  (==) :: Eq a => List a -> List a -> Bool
+  (==) Empty Empty = True
+  (==) (LNode x xs) (LNode y ys) = x == y && xs == ys
+  (==) _ _ = False
 
 ------------------------------------------------------------------------------
 -- Ex 5: below you'll find two datatypes, Egg and Milk. Implement a
@@ -74,6 +88,16 @@ data Egg = ChickenEgg | ChocolateEgg
   deriving Show
 data Milk = Milk Int -- amount in litres
   deriving Show
+
+class Price a where
+  price :: a -> Int
+
+instance Price Egg where
+  price ChickenEgg = 20
+  price ChocolateEgg = 30
+
+instance Price Milk where
+  price (Milk l) = 15*l
 
 
 ------------------------------------------------------------------------------
@@ -95,6 +119,20 @@ data Milk = Milk Int -- amount in litres
 
 data Number = Finite Integer | Infinite
   deriving (Show,Eq)
+
+instance Ord Number where
+  (<=) :: Number -> Number -> Bool
+  (<=) _ Infinite = True
+  (<=) Infinite _ = False
+  (<=) (Finite a) (Finite b) = a <= b
+
+  min x y | x <= y = x
+          | otherwise = y
+
+  max Infinite _ = Infinite
+  max _ Infinite = Infinite
+  max x y | x <= y = y
+          | otherwise = x
 
 
 ------------------------------------------------------------------------------

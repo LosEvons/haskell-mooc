@@ -47,19 +47,25 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split = todo
+split str
+  | ' ' `elem` str = let (a, b) = break (==' ') str in Just (a, tail b)
+  | otherwise = Nothing
 
 -- checkNumber should take a pair of two strings and return them
 -- unchanged if they don't contain numbers. Otherwise Nothing is
 -- returned.
 checkNumber :: (String, String) -> Maybe (String, String)
-checkNumber = todo
+checkNumber (str1, str2)
+  | any isDigit str1 || any isDigit str2 = Nothing
+  | otherwise = Just (str1, str2)
 
 -- checkCapitals should take a pair of two strings and return them
 -- unchanged if both start with a capital letter. Otherwise Nothing is
 -- returned.
 checkCapitals :: (String, String) -> Maybe (String, String)
-checkCapitals (for,sur) = todo
+checkCapitals (for,sur)
+  | isUpper (head for) && isUpper (head sur) = Just (for,sur)
+  | otherwise = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given a list of players and their scores (as [(String,Int)]),
@@ -86,7 +92,11 @@ checkCapitals (for,sur) = todo
 --     ==> Just "a"
 
 winner :: [(String,Int)] -> String -> String -> Maybe String
-winner scores player1 player2 = todo
+winner scores player1 player2 =
+  do
+    player1score <- lookup player1 scores
+    player2score <- lookup player2 scores
+    if player1score >= player2score then return player1 else return player2
 
 ------------------------------------------------------------------------------
 -- Ex 3: given a list of indices and a list of values, return the sum
@@ -104,7 +114,16 @@ winner scores player1 player2 = todo
 --    Nothing
 
 selectSum :: Num a => [a] -> [Int] -> Maybe a
-selectSum xs is = todo
+selectSum xs is =
+  do
+    t <- mapM (safeIndex xs) is
+    return (sum t)
+
+safeIndex :: Num a => [a] -> Int -> Maybe a
+safeIndex [] _ = Nothing
+safeIndex xs i
+  | i >= length xs || i < 0 = Nothing
+  | otherwise = Just (xs !! i)
 
 ------------------------------------------------------------------------------
 -- Ex 4: Here is the Logger monad from the course material. Implement
@@ -138,7 +157,7 @@ instance Applicative Logger where
   (<*>) = ap
 
 countAndLog :: Show a => (a -> Bool) -> [a] -> Logger Int
-countAndLog = todo
+countAndLog f xs = Logger (map show $ filter f xs) (length $ filter f xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: You can find the Bank and BankOp code from the course
@@ -185,7 +204,11 @@ rob from to = todo
 --    ==> ((),7)
 
 update :: State Int ()
-update = todo
+update = 
+  do
+    old <- get
+    put (old*2+1)
+
 
 ------------------------------------------------------------------------------
 -- Ex 8: Checking that parentheses are balanced with the State monad.

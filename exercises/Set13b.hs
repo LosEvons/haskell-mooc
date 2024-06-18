@@ -42,7 +42,8 @@ test = do
   return (x<10)
 
 ifM :: Monad m => m Bool -> m a -> m a -> m a
-ifM opBool opThen opElse = todo
+ifM opBool opThen opElse = 
+  opBool >>= \r -> if r then opThen else opElse
 
 ------------------------------------------------------------------------------
 -- Ex 2: the standard library function Control.Monad.mapM defines a
@@ -84,7 +85,7 @@ perhapsIncrement True x = modify (+x)
 perhapsIncrement False _ = return ()
 
 mapM2 :: Monad m => (a -> b -> m c) -> [a] -> [b] -> m [c]
-mapM2 op xs ys = todo
+mapM2 op xs ys = zipWithM op xs ys
 
 ------------------------------------------------------------------------------
 -- Ex 3: Finding paths.
@@ -142,14 +143,27 @@ maze1 = [("Entry",["Pit","Corridor 1"])
 
 
 visit :: [(String,[String])] -> String -> State [String] ()
-visit maze place = todo
+visit maze place = 
+  do
+    mem <- get
+    if place `elem` mem then
+      put mem
+    else do
+      put (place : mem)
+      case lookup place maze of
+        Just nodes -> mapM_ (visit maze) nodes
+        Nothing -> return ()
 
 -- Now you should be able to implement path using visit. If you run
 -- visit on a place using an empty state, you'll get a state that
 -- lists all the places that are reachable from the starting place.
-
 path :: [(String,[String])] -> String -> String -> Bool
-path maze place1 place2 = todo
+path maze place1 place2 = 
+  evalState (
+    do
+      visit maze place1 
+      r <- get
+      return (place2 `elem` r)) []
 
 ------------------------------------------------------------------------------
 -- Ex 4: Given two lists, ks and ns, find numbers i and j from ks,
@@ -165,7 +179,11 @@ path maze place1 place2 = todo
 -- PS. The tests don't care about the order of results.
 
 findSum2 :: [Int] -> [Int] -> [(Int,Int,Int)]
-findSum2 ks ns = todo
+findSum2 ks ns = do
+  a <- ks
+  b <- ks
+  c <- ns
+  if (a+b==c) then [(a,b,c)] else [] -- STUDENT NOTE: That's really cool!
 
 ------------------------------------------------------------------------------
 -- Ex 5: compute all possible sums of elements from the given
@@ -186,7 +204,10 @@ findSum2 ks ns = todo
 --     ==> [7,3,5,1,6,2,4,0]
 
 allSums :: [Int] -> [Int]
-allSums xs = todo
+allSums xs =
+  mapM (\x -> [x,0]) xs >>=
+  return . sum
+
 
 ------------------------------------------------------------------------------
 -- Ex 6: the standard library defines the function

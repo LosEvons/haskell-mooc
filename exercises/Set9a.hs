@@ -15,6 +15,9 @@ import Data.List
 import Data.Ord
 
 import Mooc.Todo
+import GHC.Base (neChar)
+import Control.Arrow (Arrow(arr))
+import Data.Either (rights)
 
 ------------------------------------------------------------------------------
 -- Ex 1: Implement a function workload that takes in the number of
@@ -26,7 +29,11 @@ import Mooc.Todo
 -- Otherwise return "Ok."
 
 workload :: Int -> Int -> String
-workload nExercises hoursPerExercise = todo
+workload nExercises hoursPerExercise 
+  | total > 100 = "Holy moly!"
+  | total < 10 = "Piece of cake!"
+  | otherwise = "Ok."
+  where total = nExercises * hoursPerExercise
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function echo that builds a string like this:
@@ -39,7 +46,8 @@ workload nExercises hoursPerExercise = todo
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo "" = ""
+echo str = str ++ ", " ++ echo (tail str)
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -52,7 +60,13 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid str = length (filter checkValid str)
+
+checkValid :: String -> Bool
+checkValid str 
+  | str !! 2 == str !! 4 = True
+  | str !! 3 == str !! 5 = True
+  | otherwise = False
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -64,8 +78,11 @@ countValid = todo
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
-
+repeated [] = Nothing
+repeated [x] = Nothing
+repeated arr
+  | head arr == head (tail arr) = Just (head arr)
+  | otherwise = repeated (tail arr)
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
 -- measurements have failed, so the lab is using the type
@@ -86,7 +103,10 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess arr = 
+  if length (rights arr) > 0 
+    then Right (sum (rights arr))
+    else Left "no data"
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock

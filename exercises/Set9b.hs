@@ -1,3 +1,6 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant if" #-}
+{-# OPTIONS_GHC -Wno-overlapping-patterns #-}
 module Set9b where
 
 import Mooc.Todo
@@ -47,10 +50,10 @@ type Col   = Int
 type Coord = (Row, Col)
 
 nextRow :: Coord -> Coord
-nextRow (i,j) = todo
+nextRow (i,j) = (i+1,1)
 
 nextCol :: Coord -> Coord
-nextCol (i,j) = todo
+nextCol (i,j) = (i, j+1)
 
 --------------------------------------------------------------------------------
 -- Ex 2: Implement the function prettyPrint that, given the size of
@@ -103,7 +106,11 @@ nextCol (i,j) = todo
 type Size = Int
 
 prettyPrint :: Size -> [Coord] -> String
-prettyPrint = todo
+prettyPrint size l_coords = unlines [printRow size y s_coords | y <- [1..size]]
+    where s_coords = sort l_coords
+
+printRow :: Int -> Int -> [Coord] -> String
+printRow size row l_coords = [if (row,x) `elem` l_coords then 'Q' else '.' | x <- [1..size]]
 
 --------------------------------------------------------------------------------
 -- Ex 3: The task in this exercise is to define the relations sameRow, sameCol,
@@ -127,17 +134,20 @@ prettyPrint = todo
 --   sameAntidiag (500,5) (5,500) ==> True
 
 sameRow :: Coord -> Coord -> Bool
-sameRow (i,j) (k,l) = todo
+sameRow (i,j) (k,l) = i == k
 
 sameCol :: Coord -> Coord -> Bool
-sameCol (i,j) (k,l) = todo
+sameCol (i,j) (k,l) = j == l
 
 sameDiag :: Coord -> Coord -> Bool
-sameDiag (i,j) (k,l) = todo
+sameDiag (i,j) (k,l) = 
+    ( abs (i - k) == abs (j -l) && ((i < k && j < l) || (i > k && j > l)) ) 
+    || (i == k && j == l)
 
 sameAntidiag :: Coord -> Coord -> Bool
-sameAntidiag (i,j) (k,l) = todo
-
+sameAntidiag (i,j) (k,l) = 
+    ( abs (i - k) == abs (j - l) && ((i < k && j > l) || (i > k && j < l)) ) 
+    || (i == k && j == l)
 --------------------------------------------------------------------------------
 -- Ex 4: In chess, a queen may capture another piece in the same row, column,
 -- diagonal, or antidiagonal in one step. This danger zone, where pieces can be
@@ -191,7 +201,15 @@ type Candidate = Coord
 type Stack     = [Coord]
 
 danger :: Candidate -> Stack -> Bool
-danger = todo
+danger _ [] = False
+danger cand (x:xs) 
+    | sameCol x cand = True
+    | sameRow x cand = True
+    | sameDiag x cand = True
+    | sameAntidiag x cand = True
+    | otherwise = danger cand xs
+
+
 
 --------------------------------------------------------------------------------
 -- Ex 5: In this exercise, the task is to write a modified version of
@@ -226,7 +244,16 @@ danger = todo
 -- solution to this version. Any working solution is okay in this exercise.)
 
 prettyPrint2 :: Size -> Stack -> String
-prettyPrint2 = todo
+prettyPrint2 size l_coords = unlines [printRow2 size y s_coords | y <- [1..size]]
+    where s_coords = sort l_coords
+
+printRow2 :: Int -> Int -> Stack -> String
+printRow2 size row l_coords = [
+    if (row,x) `elem` l_coords then 'Q' 
+    else 
+        if danger (row,x) l_coords then '#'
+        else '.' 
+    | x <- [1..size]]
 
 --------------------------------------------------------------------------------
 -- Ex 6: Now that we can check if a piece can be safely placed into a square in
